@@ -1,4 +1,3 @@
-// components/delete-account-button.tsx
 'use client'
 
 import { useTransition } from 'react'
@@ -17,13 +16,17 @@ export default function DeleteAccountButton({ id, onComplete }: DeleteAccountBut
         if (!confirm('Are you sure? This will delete the account and all associated transactions.')) return
 
         startTransition(async () => {
-            await deleteAccount(id)
+            const formData = new FormData()
+            formData.append('id', id)
+
+            await deleteAccount(formData)
             onComplete?.()
         })
     }
 
     return (
         <button
+            type="button"
             onClick={handleDelete}
             disabled={isPending}
             className="flex items-center gap-2 w-full px-3 py-2 text-xs text-negative hover:bg-negative/10 transition-colors disabled:opacity-50"

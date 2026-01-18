@@ -9,6 +9,7 @@ interface ChartData {
     name: string
     value: number
     count?: number
+    [key: string]: string | number | undefined
 }
 
 interface SpendingChartProps {
@@ -50,7 +51,7 @@ export default function SpendingChart({ data, total }: SpendingChartProps) {
         ]
         : data
 
-    const handlePieEnter = (_: any, index: number) => {
+    const handlePieEnter = (_: unknown, index: number) => {
         setActiveIndex(index)
     }
 

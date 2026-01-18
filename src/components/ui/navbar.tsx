@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Wallet, BarChart3, PieChart, Settings, List } from 'lucide-react'
-import AddTransactionModal from '@/components/transactions/modals/add-transaction-modal'
 import { BrandLogo } from '@/components/ui/logo' // <--- 1. Import Logo
 
 export default function Navbar() {
@@ -21,7 +20,7 @@ export default function Navbar() {
 
     const links = [
         // ... keep existing links ...
-        { href: '/', label: 'Overview', icon: <BarChart3 size={18} /> },
+        { href: '/dashboard', label: 'Overview', icon: <BarChart3 size={18} /> },
         { href: '/transactions', label: 'Transactions', icon: <List size={18} /> },
         { href: '/accounts', label: 'Accounts', icon: <Wallet size={18} /> },
         { href: '/categories', label: 'Categories', icon: <PieChart size={18} /> },
@@ -36,7 +35,7 @@ export default function Navbar() {
 
                 {/* LOGO SECTION */}
                 <Link
-                    href="/"
+                    href="/dashboard"
                     className="flex items-center gap-2.5 group transition-opacity hover:opacity-90"
                 >
                     {/* 2. Replace the old div with BrandLogo */}
@@ -54,8 +53,8 @@ export default function Navbar() {
                             key={link.href}
                             href={link.href}
                             className={`flex items-center gap-2 text-sm font-medium transition-colors duration-200 ${isActive(link.href)
-                                    ? 'text-foreground font-semibold'
-                                    : 'text-muted hover:text-foreground'
+                                ? 'text-foreground font-semibold'
+                                : 'text-muted hover:text-foreground'
                                 }`}
                         >
                             {link.label}
@@ -63,6 +62,8 @@ export default function Navbar() {
                     ))}
                 </nav>
             </div>
+            
         </header>
+        
     )
 }

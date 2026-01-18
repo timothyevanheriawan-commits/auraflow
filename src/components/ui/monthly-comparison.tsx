@@ -13,7 +13,6 @@ interface MonthlyComparisonProps {
 }
 
 export default function MonthlyComparison({
-    currentMonth,
     currentIncome,
     currentExpense,
     prevIncome,

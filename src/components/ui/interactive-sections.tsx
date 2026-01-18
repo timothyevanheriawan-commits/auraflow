@@ -1,14 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Download, ChevronRight, Sun, Moon, Monitor } from 'lucide-react'
+import { Download, ChevronRight, Sun, Moon } from 'lucide-react'
 import { getExportData } from '@/app/actions/export'
+import { toast } from 'sonner' // Principle 5: Feedback interactivity
+
+// --- PRINCIPLE 4: Strict Type Definitions ---
+interface ExportTransaction {
+    date: string
+    description: string | null
+    amount: number
+    categories: { name: string; type: string } | null
+    accounts: { name: string } | null
+}
 
 // --- 1. THEME TOGGLE COMPONENT ---
 export function AppearanceSection() {
     const [theme, setTheme] = useState<'dark' | 'light' | 'system'>('dark')
 
-    // Simple theme logic (Tailwind class manipulation)
     useEffect(() => {
         const root = window.document.documentElement
         if (theme === 'dark') {
@@ -16,7 +25,6 @@ export function AppearanceSection() {
         } else if (theme === 'light') {
             root.classList.remove('dark')
         } else {
-            // System
             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 root.classList.add('dark')
             } else {
@@ -26,33 +34,35 @@ export function AppearanceSection() {
     }, [theme])
 
     return (
+        // Principle 2: Solid bg-surface
         <div className="rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                     <Sun size={16} className="text-tertiary" />
-                    <span className="text-sm font-medium text-foreground">Appearance</span>
+                    <span className="text-sm font-bold text-foreground font-display">Appearance</span>
                 </div>
             </div>
             <div className="flex gap-2">
+                {/* Principle 3: High-Contrast Active States */}
                 <button
                     onClick={() => setTheme('dark')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border transition-all ${theme === 'dark'
-                        ? 'bg-elevated border-[#334155] text-foreground'
-                        : 'bg-surface border-border text-tertiary hover:text-muted'
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border transition-all active:scale-95 ${theme === 'dark'
+                            ? 'bg-foreground border-border text-background shadow-md font-bold'
+                            : 'bg-elevated border-border text-muted hover:text-foreground'
                         }`}
                 >
                     <Moon size={14} />
-                    <span className="text-xs font-medium">Dark</span>
+                    <span className="text-xs">Dark</span>
                 </button>
                 <button
                     onClick={() => setTheme('light')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border transition-all ${theme === 'light'
-                        ? 'bg-background border-border text-[#020617]'
-                        : 'bg-surface border-border text-tertiary hover:text-muted'
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border transition-all active:scale-95 ${theme === 'light'
+                            ? 'bg-foreground border-border text-background shadow-md font-bold'
+                            : 'bg-elevated border-border text-muted hover:text-foreground'
                         }`}
                 >
                     <Sun size={14} />
-                    <span className="text-xs font-medium">Light</span>
+                    <span className="text-xs">Light</span>
                 </button>
             </div>
         </div>
@@ -66,14 +76,20 @@ export function DataManagementSection() {
     const handleExportCSV = async () => {
         setLoading(true)
         try {
-            const { data } = await getExportData()
-            if (!data) return
+            const result = await getExportData()
+            // FIX: Principle 4 - Cast the data to the correct interface
+            const transactions = (result?.data as unknown as ExportTransaction[]) || []
 
-            // Convert to CSV
+            if (transactions.length === 0) {
+                toast.error("No data found to export")
+                setLoading(false)
+                return
+            }
+
             const headers = ['Date', 'Description', 'Amount', 'Type', 'Category', 'Account']
-            const rows = data.map((tx: any) => [
+            const rows = transactions.map((tx) => [
                 tx.date,
-                `"${tx.description || ''}"`, // Handle commas in description
+                `"${tx.description || ''}"`,
                 tx.amount,
                 tx.categories?.type || 'unknown',
                 tx.categories?.name || 'Uncategorized',
@@ -85,7 +101,6 @@ export function DataManagementSection() {
                 ...rows.map(r => r.join(','))
             ].join('\n')
 
-            // Trigger Download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
             const url = URL.createObjectURL(blob)
             const link = document.createElement('a')
@@ -94,16 +109,15 @@ export function DataManagementSection() {
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
-        } catch (e) {
-            alert("Failed to export data")
+
+            toast.success("CSV Downloaded successfully")
+        } catch (error) {
+            // FIX: Principle 5 - Log error and provide toast feedback instead of alert
+            console.error("Export Error:", error)
+            toast.error("Failed to export data", { description: "Please check your permissions and try again." })
         } finally {
             setLoading(false)
         }
-    }
-
-    const handleExportPDF = () => {
-        // Native print is the easiest way to generate a PDF without heavy libraries
-        window.print()
     }
 
     return (
@@ -112,40 +126,40 @@ export function DataManagementSection() {
             <button
                 onClick={handleExportCSV}
                 disabled={loading}
-                className="w-full group rounded-xl border border-border bg-surface p-4 hover:border-[#334155] transition-all text-left disabled:opacity-50"
+                className="w-full group rounded-xl border border-border bg-surface p-4 hover:border-foreground transition-all text-left disabled:opacity-50 active:scale-[0.98]"
             >
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-elevated text-tertiary group-hover:text-muted">
-                            <Download size={16} className={loading ? "animate-bounce" : ""} />
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-elevated text-foreground border border-border group-hover:scale-105 transition-transform">
+                            <Download size={18} className={loading ? "animate-bounce" : ""} />
                         </div>
                         <div>
-                            <span className="text-sm font-medium text-foreground block">
-                                {loading ? 'Generating CSV...' : 'Export to CSV'}
+                            <span className="text-sm font-bold text-foreground block font-display">
+                                {loading ? 'Processing...' : 'Export to CSV'}
                             </span>
-                            <span className="text-xs text-tertiary">Download all transactions</span>
+                            <span className="text-xs text-muted font-medium">Download transaction spreadsheet</span>
                         </div>
                     </div>
-                    <ChevronRight size={16} className="text-tertiary" />
+                    <ChevronRight size={16} className="text-tertiary group-hover:translate-x-1 transition-transform" />
                 </div>
             </button>
 
             {/* PDF */}
             <button
-                onClick={handleExportPDF}
-                className="w-full group rounded-xl border border-border bg-surface p-4 hover:border-[#334155] transition-all text-left"
+                onClick={() => window.print()}
+                className="w-full group rounded-xl border border-border bg-surface p-4 hover:border-foreground transition-all text-left active:scale-[0.98]"
             >
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-elevated text-tertiary group-hover:text-muted">
-                            <Download size={16} />
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-elevated text-foreground border border-border group-hover:scale-105 transition-transform">
+                            <Download size={18} />
                         </div>
                         <div>
-                            <span className="text-sm font-medium text-foreground block">Print / Save as PDF</span>
-                            <span className="text-xs text-tertiary">Generate report via browser</span>
+                            <span className="text-sm font-bold text-foreground block font-display">Print / Save as PDF</span>
+                            <span className="text-xs text-muted font-medium">Generate formatted monthly report</span>
                         </div>
                     </div>
-                    <ChevronRight size={16} className="text-tertiary" />
+                    <ChevronRight size={16} className="text-tertiary group-hover:translate-x-1 transition-transform" />
                 </div>
             </button>
         </div>

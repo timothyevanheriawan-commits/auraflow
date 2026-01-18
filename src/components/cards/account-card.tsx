@@ -5,7 +5,6 @@ import {
     MoreVertical,
     Edit2,
     Trash2,
-    ChevronRight,
     Building2,
     Smartphone,
     Wallet,
@@ -13,52 +12,40 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { deleteAccount } from '@/app/actions/account'
-import EditAccountModal from '@/components/accounts/edit-account-modal' // <--- Import Modal
+import EditAccountModal from '@/components/accounts/edit-account-modal'
 
 // Bank brand detection
 const BANK_BRANDS: Record<string, { color: string; abbr: string }> = {
-    'bca': { color: '#0066AE', abbr: 'BCA' },
-    'mandiri': { color: '#003D79', abbr: 'MDR' },
-    'bni': { color: '#F15A22', abbr: 'BNI' },
-    'bri': { color: '#00529C', abbr: 'BRI' },
-    'cimb': { color: '#EC1C24', abbr: 'CMB' },
-    'jago': { color: '#E35926', abbr: 'JGO' },
-    'seabank': { color: '#FF5C00', abbr: 'SEA' },
+    bca: { color: '#0066AE', abbr: 'BCA' },
+    mandiri: { color: '#003D79', abbr: 'MDR' },
+    bni: { color: '#F15A22', abbr: 'BNI' },
+    bri: { color: '#00529C', abbr: 'BRI' },
+    cimb: { color: '#EC1C24', abbr: 'CMB' },
+    jago: { color: '#E35926', abbr: 'JGO' },
+    seabank: { color: '#FF5C00', abbr: 'SEA' },
 }
 
 const WALLET_BRANDS: Record<string, { color: string; abbr: string }> = {
-    'gopay': { color: '#00AA13', abbr: 'GPY' },
-    'ovo': { color: '#4C3494', abbr: 'OVO' },
-    'dana': { color: '#108EE9', abbr: 'DNA' },
-    'shopeepay': { color: '#EE4D2D', abbr: 'SPY' },
-    'linkaja': { color: '#ED1C24', abbr: 'LNK' },
+    gopay: { color: '#00AA13', abbr: 'GPY' },
+    ovo: { color: '#4C3494', abbr: 'OVO' },
+    dana: { color: '#108EE9', abbr: 'DNA' },
+    shopeepay: { color: '#EE4D2D', abbr: 'SPY' },
+    linkaja: { color: '#ED1C24', abbr: 'LNK' },
 }
 
 function getBrandInfo(name: string, type: string) {
     const nameLower = name.toLowerCase()
-
     if (type === 'bank') {
         for (const [key, value] of Object.entries(BANK_BRANDS)) {
             if (nameLower.includes(key)) return value
         }
     }
-
     if (type === 'wallet') {
         for (const [key, value] of Object.entries(WALLET_BRANDS)) {
             if (nameLower.includes(key)) return value
         }
     }
-
     return null
-}
-
-function getTypeIcon(type: string) {
-    switch (type) {
-        case 'bank': return Building2
-        case 'wallet': return Smartphone
-        case 'investment': return TrendingUp
-        default: return Wallet
-    }
 }
 
 interface AccountCardProps {
@@ -72,18 +59,16 @@ interface AccountCardProps {
 
 export default function AccountCard({ account }: AccountCardProps) {
     const [showMenu, setShowMenu] = useState(false)
-    const [isEditOpen, setIsEditOpen] = useState(false) // <--- State for Edit Modal
-    const [isDeleting, startDeleteTransition] = useTransition() // <--- Use Transition for Delete
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleting, startDeleteTransition] = useTransition()
 
     const brand = getBrandInfo(account.name, account.type)
-    const IconComponent = getTypeIcon(account.type)
     const isNegative = account.balance < 0
 
     const handleDelete = () => {
         if (!confirm(`Delete "${account.name}"? This action cannot be undone.`)) return
 
         startDeleteTransition(async () => {
-            // FIX: Wrap in FormData to match Server Action standard
             const formData = new FormData()
             formData.append('id', account.id)
 
@@ -96,13 +81,13 @@ export default function AccountCard({ account }: AccountCardProps) {
         <>
             <div
                 className="group relative flex items-center gap-4 p-4 rounded-xl border border-border bg-surface hover:bg-elevated/50 transition-all duration-200 cursor-pointer"
-                onClick={() => setIsEditOpen(true)} // Clicking card opens edit
+                onClick={() => setIsEditOpen(true)}
             >
                 {/* Brand Icon / Type Icon */}
                 <div
                     className="flex items-center justify-center w-12 h-12 rounded-xl shrink-0 border border-border"
                     style={{
-                        backgroundColor: brand ? `${brand.color}15` : 'var(--bg-elevated)', // Semantic fallback
+                        backgroundColor: brand ? `${brand.color}15` : 'var(--bg-elevated)',
                     }}
                 >
                     {brand ? (
@@ -112,8 +97,14 @@ export default function AccountCard({ account }: AccountCardProps) {
                         >
                             {brand.abbr}
                         </span>
+                    ) : account.type === 'bank' ? (
+                        <Building2 size={20} className="text-muted" />
+                    ) : account.type === 'wallet' ? (
+                        <Smartphone size={20} className="text-muted" />
+                    ) : account.type === 'investment' ? (
+                        <TrendingUp size={20} className="text-muted" />
                     ) : (
-                        <IconComponent size={20} className="text-muted" />
+                        <Wallet size={20} className="text-muted" />
                     )}
                 </div>
 
@@ -129,8 +120,10 @@ export default function AccountCard({ account }: AccountCardProps) {
 
                 {/* Balance */}
                 <div className="shrink-0 text-right min-w-[100px]">
-                    <p className={`text-sm data-text font-bold tracking-tight ${isNegative ? 'text-red-500' : 'text-emerald-500'
-                        }`}>
+                    <p
+                        className={`text-sm font-mono data-text font-bold tracking-tight ${isNegative ? 'text-red-500' : 'text-emerald-500'
+                            }`}
+                    >
                         {formatCurrency(account.balance)}
                     </p>
                 </div>
@@ -138,8 +131,9 @@ export default function AccountCard({ account }: AccountCardProps) {
                 {/* Actions Menu Trigger */}
                 <div className="relative shrink-0">
                     <button
+                        title="Account actions"
                         onClick={(e) => {
-                            e.stopPropagation() // Prevent card click
+                            e.stopPropagation()
                             setShowMenu(!showMenu)
                         }}
                         className="flex items-center justify-center w-8 h-8 rounded-lg text-muted opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-elevated transition-all duration-150"
@@ -147,7 +141,6 @@ export default function AccountCard({ account }: AccountCardProps) {
                         <MoreVertical size={16} />
                     </button>
 
-                    {/* Dropdown Menu (Solid Background) */}
                     {showMenu && (
                         <>
                             <div
@@ -187,7 +180,6 @@ export default function AccountCard({ account }: AccountCardProps) {
                 </div>
             </div>
 
-            {/* --- EDIT MODAL --- */}
             {isEditOpen && (
                 <EditAccountModal
                     isOpen={isEditOpen}

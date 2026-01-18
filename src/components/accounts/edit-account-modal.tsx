@@ -5,15 +5,22 @@ import { X, Wallet, Landmark, Smartphone, TrendingUp, Save } from 'lucide-react'
 import { updateAccount } from '@/app/actions/account'
 import { toast } from 'sonner'
 
+// 1. Definisi Tipe Data
+interface Account {
+    id: string
+    name: string
+    balance: number
+    type: string
+}
+
 interface EditAccountModalProps {
     isOpen: boolean
     onClose: () => void
-    account: any
+    account: Account
 }
 
 export default function EditAccountModal({ isOpen, onClose, account }: EditAccountModalProps) {
     const [isPending, startTransition] = useTransition()
-    // Initialize state with existing account data
     const [selectedType, setSelectedType] = useState(account?.type || 'bank')
 
     if (!isOpen || !account) return null
@@ -26,8 +33,11 @@ export default function EditAccountModal({ isOpen, onClose, account }: EditAccou
 
         startTransition(async () => {
             const result = await updateAccount(formData)
-            if (result?.error) {
-                toast.error("Update failed", { description: result.error })
+
+            // FIX TypeScript Error:
+            // Kita cek apakah result ada, dan apakah punya properti error
+            if (result && typeof result === 'object' && 'error' in result) {
+                toast.error("Update failed", { description: result.error as string })
             } else {
                 toast.success("Account updated successfully")
                 onClose()
@@ -43,12 +53,11 @@ export default function EditAccountModal({ isOpen, onClose, account }: EditAccou
     ]
 
     return (
-        // 1. OVERLAY: Solid Dark with Blur (z-[100])
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+        // FIX Tailwind Warning: Gunakan z-50 (standar max tailwind) yang sudah cukup menutupi navbar (z-40)
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
 
-            {/* 2. CARD: Solid bg-surface */}
             <div
-                className="w-full max-w-lg rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden"
+                className="w-full max-w-lg rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
@@ -56,6 +65,8 @@ export default function EditAccountModal({ isOpen, onClose, account }: EditAccou
                     <h2 className="font-display text-lg font-bold text-foreground">Edit Account</h2>
                     <button
                         onClick={onClose}
+                        type="button"
+                        title="Close modal"
                         className="h-8 w-8 flex items-center justify-center rounded-full bg-elevated text-muted hover:bg-border hover:text-foreground transition-colors"
                     >
                         <X size={18} />
@@ -74,8 +85,8 @@ export default function EditAccountModal({ isOpen, onClose, account }: EditAccou
                                 <button
                                     key={type.id}
                                     type="button"
+                                    title={`Select ${type.label}`}
                                     onClick={() => setSelectedType(type.id)}
-                                    // Active State: Border Foreground & Ring
                                     className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${selectedType === type.id
                                             ? 'border-foreground bg-background shadow-md ring-1 ring-foreground'
                                             : 'border-border bg-elevated hover:bg-border hover:border-muted'
@@ -96,8 +107,11 @@ export default function EditAccountModal({ isOpen, onClose, account }: EditAccou
                     {/* Inputs */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Name</label>
+                            <label htmlFor="account-name" className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">
+                                Name
+                            </label>
                             <input
+                                id="account-name"
                                 name="name"
                                 type="text"
                                 defaultValue={account.name}
@@ -106,8 +120,11 @@ export default function EditAccountModal({ isOpen, onClose, account }: EditAccou
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Current Balance</label>
+                            <label htmlFor="account-balance" className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">
+                                Current Balance
+                            </label>
                             <input
+                                id="account-balance"
                                 name="balance"
                                 type="number"
                                 defaultValue={account.balance}

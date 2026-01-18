@@ -41,6 +41,7 @@ export default function DateRangePicker({ currentRange }: DateRangePickerProps) 
                 <Calendar size={12} />
             </div>
             <select
+                title='date range'
                 value={currentRange || 'all'}
                 onChange={(e) => handleChange(e.target.value)}
                 className="appearance-none rounded-lg border border-border bg-surface pl-8 pr-8 py-2 text-xs font-medium text-muted focus:outline-none focus:border-[#334155] cursor-pointer transition-colors duration-150"

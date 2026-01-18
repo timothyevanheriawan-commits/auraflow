@@ -61,7 +61,7 @@ export function ResetDataButton() {
         <>
             <button
                 onClick={() => setShowConfirm(true)}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/5 hover:bg-negative/10 transition-colors duration-150 text-left"
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-negative/30 bg-negative/5 hover:bg-negative/10 transition-colors duration-150 text-left"
             >
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-negative/10">
                     <Trash2 size={16} className="text-negative" />
@@ -81,7 +81,7 @@ export function ResetDataButton() {
                     onClick={() => setShowConfirm(false)}
                 >
                     <div
-                        className="w-full max-w-md rounded-xl border border-[#EF4444]/30 bg-surface overflow-hidden"
+                        className="w-full max-w-md rounded-xl border border-negative/30 bg-surface overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
@@ -117,7 +117,7 @@ export function ResetDataButton() {
                                 value={confirmText}
                                 onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
                                 placeholder="DELETE"
-                                className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-[#334155] focus:outline-none focus:border-[#EF4444]/50 transition-colors duration-150"
+                                className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-[#334155] focus:outline-none focus:border-negative/50 transition-colors duration-150"
                             />
 
                             <div className="flex gap-3 mt-6">
@@ -133,7 +133,7 @@ export function ResetDataButton() {
                                 <button
                                     onClick={handleReset}
                                     disabled={confirmText !== 'DELETE' || isPending}
-                                    className="flex-1 py-3 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+                                    className="flex-1 py-3 rounded-lg bg-negative text-white text-sm font-semibold hover:bg-[#DC2626] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
                                 >
                                     {isPending ? 'Deleting...' : 'Delete Everything'}
                                 </button>

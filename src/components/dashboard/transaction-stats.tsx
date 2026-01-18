@@ -13,7 +13,6 @@ interface TransactionStatsProps {
 export default function TransactionStats({
   transactionCount,
   avgDailyExpense,
-  avgTransactionAmount,
   largestExpense,
   topCategory,
 }: TransactionStatsProps) {

@@ -18,8 +18,6 @@ export default function InsightBanner({
     totalIncome,
     totalExpense,
     topCategory,
-    daysRemaining,
-    projectedExpense,
 }: InsightBannerProps) {
     const getInsight = (): { message: string; type: 'positive' | 'warning' | 'neutral' } => {
         if (totalIncome === 0 && totalExpense > 0) {

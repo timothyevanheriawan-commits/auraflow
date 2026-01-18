@@ -47,7 +47,7 @@ export default function AddCategoryModal() {
 
     return (
         <>
-            {/* 1. TRIGGER BUTTON (Solid & Tactile) */}
+            {/* 1. TRIGGER BUTTON */}
             <button
                 onClick={() => setIsOpen(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-foreground text-background text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-sm"
@@ -58,9 +58,10 @@ export default function AddCategoryModal() {
 
             {/* 2. MODAL OVERLAY */}
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+                // FIX: z-[100] -> z-50 (Canonical Class)
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
 
-                    {/* 3. MODAL CARD (Solid Surface) */}
+                    {/* 3. MODAL CARD */}
                     <div
                         className="w-full max-w-md rounded-2xl border border-border bg-surface text-foreground shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                         onClick={e => e.stopPropagation()}
@@ -71,6 +72,8 @@ export default function AddCategoryModal() {
                                 New Category
                             </h2>
                             <button
+                                type="button"
+                                title="Close modal" // FIX: Accessibility Name
                                 onClick={() => setIsOpen(false)}
                                 className="h-8 w-8 flex items-center justify-center rounded-full bg-elevated text-muted hover:bg-border hover:text-foreground transition-colors"
                             >
@@ -82,14 +85,14 @@ export default function AddCategoryModal() {
 
                             {/* Type Switcher */}
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-3">Type</label>
+                                <span className="block text-xs font-bold uppercase tracking-wider text-muted mb-3">Type</span>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setType('expense')}
                                         className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all border ${type === 'expense'
-                                                ? 'bg-red-500 border-red-600 text-white shadow-md'
-                                                : 'bg-elevated border-border text-muted hover:bg-border hover:text-foreground'
+                                            ? 'bg-red-500 border-red-600 text-white shadow-md'
+                                            : 'bg-elevated border-border text-muted hover:bg-border hover:text-foreground'
                                             }`}
                                     >
                                         <TrendingDown size={16} />
@@ -100,8 +103,8 @@ export default function AddCategoryModal() {
                                         type="button"
                                         onClick={() => setType('income')}
                                         className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all border ${type === 'income'
-                                                ? 'bg-emerald-500 border-emerald-600 text-white shadow-md'
-                                                : 'bg-elevated border-border text-muted hover:bg-border hover:text-foreground'
+                                            ? 'bg-emerald-500 border-emerald-600 text-white shadow-md'
+                                            : 'bg-elevated border-border text-muted hover:bg-border hover:text-foreground'
                                             }`}
                                     >
                                         <TrendingUp size={16} />
@@ -112,8 +115,9 @@ export default function AddCategoryModal() {
 
                             {/* Name Input */}
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Name</label>
+                                <label htmlFor="category-name" className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Name</label>
                                 <input
+                                    id="category-name"
                                     name="name"
                                     type="text"
                                     placeholder="e.g. Groceries, Salary, Netflix..."
@@ -126,7 +130,7 @@ export default function AddCategoryModal() {
                             {/* Color Picker */}
                             <div>
                                 <div className="flex items-center justify-between mb-3">
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-muted">Color</label>
+                                    <span className="block text-xs font-bold uppercase tracking-wider text-muted">Color</span>
                                     <span className="text-[10px] text-muted uppercase font-mono">{selectedColor}</span>
                                 </div>
 
@@ -136,10 +140,11 @@ export default function AddCategoryModal() {
                                         <button
                                             key={c}
                                             type="button"
+                                            title={`Select color ${c}`}
                                             onClick={() => setSelectedColor(c)}
                                             className={`relative h-9 w-9 rounded-full flex items-center justify-center transition-all ${selectedColor === c
-                                                    ? 'scale-110 ring-2 ring-offset-2 ring-foreground ring-offset-surface shadow-sm'
-                                                    : 'hover:scale-105 hover:opacity-80'
+                                                ? 'scale-110 ring-2 ring-offset-2 ring-foreground ring-offset-surface shadow-sm'
+                                                : 'hover:scale-105 hover:opacity-80'
                                                 }`}
                                             style={{ backgroundColor: c }}
                                         >
@@ -151,9 +156,9 @@ export default function AddCategoryModal() {
                                     <button
                                         type="button"
                                         onClick={() => colorInputRef.current?.click()}
-                                        className={`relative h-9 w-9 rounded-full flex items-center justify-center transition-all bg-gradient-to-br from-red-500 via-green-500 to-blue-500 ${!COLORS.includes(selectedColor)
-                                                ? 'scale-110 ring-2 ring-offset-2 ring-foreground ring-offset-surface'
-                                                : 'hover:scale-105 opacity-80 hover:opacity-100'
+                                        className={`relative h-9 w-9 rounded-full flex items-center justify-center transition-all bg-linear-to-br from-red-500 via-green-500 to-blue-500 ${!COLORS.includes(selectedColor)
+                                            ? 'scale-110 ring-2 ring-offset-2 ring-foreground ring-offset-surface'
+                                            : 'hover:scale-105 opacity-80 hover:opacity-100'
                                             }`}
                                         title="Custom Color"
                                     >
@@ -164,8 +169,10 @@ export default function AddCategoryModal() {
                                         )}
                                     </button>
 
-                                    {/* Hidden Native Input */}
+                                    {/* FIX: Hidden Native Input with Label */}
+                                    <label htmlFor="custom-color-input" className="sr-only">Choose custom color</label>
                                     <input
+                                        id="custom-color-input"
                                         ref={colorInputRef}
                                         type="color"
                                         className="invisible absolute top-0 left-0"

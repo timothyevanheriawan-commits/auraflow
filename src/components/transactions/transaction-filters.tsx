@@ -1,79 +1,79 @@
-// components/transaction-filters.tsx
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
-import { Filter, ArrowUpDown, Calendar } from 'lucide-react'
+import { useCallback, Suspense } from 'react'
+import { Filter, ArrowUpDown, X, Calendar } from 'lucide-react'
 
-interface Category {
-  id: string
-  name: string
-  type: string
-}
+// --- PRINCIPLE 4: Strict Type Definitions ---
 
-interface Account {
+interface FilterOption {
   id: string
   name: string
 }
 
 interface TransactionFiltersProps {
-  categories: Category[]
-  accounts: Account[]
-  currentFilters?: {
-    type?: string
-    category?: string
-    account?: string
-    sort?: string
-    range?: string
-  }
+  categories: FilterOption[]
+  accounts: FilterOption[]
 }
 
-const DATE_RANGES = [
-  { value: 'all', label: 'All Time' },
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'Last 7 Days' },
-  { value: 'month', label: 'This Month' },
-  { value: 'year', label: 'This Year' },
-]
+interface FilterSelectProps {
+  icon?: React.ReactNode
+  value: string
+  label: string // For accessibility (Axe audit fix)
+  onChange: (value: string) => void
+  options: { value: string; label: string }[]
+}
 
-export default function TransactionFilters({
-  categories,
-  accounts,
-  currentFilters = {},
-}: TransactionFiltersProps) {
+export default function TransactionFilters({ categories, accounts }: TransactionFiltersProps) {
+  return (
+    <Suspense fallback={<div className="h-10 w-full bg-elevated animate-pulse rounded-lg" />}>
+      <FilterContent categories={categories} accounts={accounts} />
+    </Suspense>
+  )
+}
+
+function FilterContent({ categories, accounts }: TransactionFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const updateFilter = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
+  const currentFilters = {
+    range: searchParams.get('range') || 'this-month',
+    type: searchParams.get('type') || 'all',
+    category: searchParams.get('category') || 'all',
+    account: searchParams.get('account') || 'all',
+    sort: searchParams.get('sort') || 'newest'
+  }
 
-      if (value && value !== 'all') {
-        params.set(key, value)
-      } else {
-        params.delete(key)
-      }
+  const updateFilter = useCallback((key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value && value !== 'all') params.set(key, value)
+    else params.delete(key)
+    router.push(`/transactions?${params.toString()}`)
+  }, [router, searchParams])
 
-      router.push(`/transactions?${params.toString()}`)
-    },
-    [router, searchParams]
-  )
+  const clearFilters = () => router.push('/transactions')
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {/* Date Range */}
+    <div className="flex items-center gap-3 flex-wrap">
+      {/* PRINCIPLE 3 & 5: Functional, High-Contrast Selectors */}
       <FilterSelect
-        icon={<Calendar size={12} />}
-        value={currentFilters.range || 'all'}
-        onChange={(value) => updateFilter('range', value)}
-        options={DATE_RANGES}
+        label="Date Range"
+        icon={<Calendar size={14} />}
+        value={currentFilters.range}
+        onChange={(val: string) => updateFilter('range', val)}
+        options={[
+          { value: 'this-month', label: 'This Month' },
+          { value: 'last-month', label: 'Last Month' },
+          { value: 'this-year', label: 'This Year' },
+          { value: 'all-time', label: 'All Time' },
+        ]}
       />
 
-      {/* Type Filter */}
       <FilterSelect
-        icon={<Filter size={12} />}
-        value={currentFilters.type || 'all'}
-        onChange={(value) => updateFilter('type', value)}
+        label="Transaction Type"
+        icon={<Filter size={14} />}
+        value={currentFilters.type}
+        onChange={(val: string) => updateFilter('type', val)}
         options={[
           { value: 'all', label: 'All Types' },
           { value: 'expense', label: 'Expenses' },
@@ -81,78 +81,76 @@ export default function TransactionFilters({
         ]}
       />
 
-      {/* Category Filter */}
       <FilterSelect
-        value={currentFilters.category || 'all'}
-        onChange={(value) => updateFilter('category', value)}
+        label="Category"
+        value={currentFilters.category}
+        onChange={(val: string) => updateFilter('category', val)}
         options={[
           { value: 'all', label: 'All Categories' },
-          ...categories.map((cat) => ({ value: cat.id, label: cat.name })),
+          ...categories.map((c) => ({ value: c.id, label: c.name }))
         ]}
       />
 
-      {/* Account Filter */}
       <FilterSelect
-        value={currentFilters.account || 'all'}
-        onChange={(value) => updateFilter('account', value)}
+        label="Account"
+        value={currentFilters.account}
+        onChange={(val: string) => updateFilter('account', val)}
         options={[
           { value: 'all', label: 'All Accounts' },
-          ...accounts.map((acc) => ({ value: acc.id, label: acc.name })),
+          ...accounts.map((a) => ({ value: a.id, label: a.name }))
         ]}
       />
 
-      {/* Sort */}
       <FilterSelect
-        icon={<ArrowUpDown size={12} />}
-        value={currentFilters.sort || 'newest'}
-        onChange={(value) => updateFilter('sort', value)}
+        label="Sort Order"
+        icon={<ArrowUpDown size={14} />}
+        value={currentFilters.sort}
+        onChange={(val: string) => updateFilter('sort', val)}
         options={[
-          { value: 'newest', label: 'Newest' },
-          { value: 'oldest', label: 'Oldest' },
+          { value: 'newest', label: 'Newest First' },
+          { value: 'oldest', label: 'Oldest First' },
+          { value: 'highest', label: 'Highest Amount' },
+          { value: 'lowest', label: 'Lowest Amount' },
         ]}
       />
+
+      {searchParams.toString().length > 0 && (
+        <button
+          onClick={clearFilters}
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-muted hover:text-foreground transition-all active:scale-95"
+        >
+          <X size={14} /> Clear Filters
+        </button>
+      )}
     </div>
   )
 }
 
-function FilterSelect({
-  icon,
-  value,
-  onChange,
-  options,
-}: {
-  icon?: React.ReactNode
-  value: string
-  onChange: (value: string) => void
-  options: { value: string; label: string }[]
-}) {
-  const isActive = value !== 'all' && value !== 'newest'
-
+function FilterSelect({ icon, value, label, onChange, options }: FilterSelectProps) {
   return (
-    <div className="relative">
+    <div className="relative group">
       {icon && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-tertiary pointer-events-none">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none group-focus-within:text-foreground transition-colors">
           {icon}
         </div>
       )}
       <select
         value={value}
+        title={label} // FIX: Axe Accessibility Audit
+        aria-label={label} // FIX: Accessibility Name
         onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none rounded-lg border py-2 pr-8 text-xs font-medium focus:outline-none cursor-pointer transition-colors duration-150 ${icon ? 'pl-8' : 'pl-3'
-          } ${isActive
-            ? 'border-[#334155] bg-elevated text-foreground'
-            : 'border-border bg-surface text-muted'
-          }`}
+        // PRINCIPLE 1 & 2: Semantic bg-surface (Solid)
+        className={`appearance-none rounded-lg border border-border bg-surface py-2.5 pr-10 text-xs font-bold text-foreground shadow-sm focus:border-foreground focus:ring-1 focus:ring-foreground cursor-pointer outline-none transition-all hover:bg-elevated ${icon ? 'pl-9' : 'pl-3'}`}
       >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
           </option>
         ))}
       </select>
-      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" className="text-tertiary">
-          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m6 9 6 6 6-6" />
         </svg>
       </div>
     </div>

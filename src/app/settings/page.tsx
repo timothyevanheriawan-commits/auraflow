@@ -3,24 +3,16 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
-    User,
     Shield,
     Lock,
     Info,
     ChevronRight,
     AlertTriangle,
-    Trash2,
-    LogOut,
-    Check,
-    Moon,
-    Bell,
-    Download,
     HelpCircle
 } from 'lucide-react'
 import { SignOutButton, ResetDataButton } from '@/components/settings/settings-buttons'
 import ExportDataButton from '@/components/ui/export-data-button'
-import AppearanceSwitch from '@/components/ui/appearance-switch'
-import PreferencesForm from '@/components/settings/preferences-form'
+
 
 
 export default async function SettingsPage() {
@@ -107,19 +99,7 @@ export default async function SettingsPage() {
                         </div>
                     </section>
 
-                    {/* Preferences Section */}
-                    <section>
-                        <h3 className="mb-4 text-xs font-medium text-muted uppercase tracking-wider pl-1">
-                            Preferences
-                        </h3>
-                        <div className="space-y-6">
-                            {/* Theme Switcher (yang sudah ada) */}
-                            <AppearanceSwitch />
 
-                            {/* Form Baru */}
-                            <PreferencesForm user={user} />
-                        </div>
-                    </section>
 
                     {/* Security Section */}
                     <section>
@@ -187,7 +167,7 @@ export default async function SettingsPage() {
 
                     {/* Danger Zone - Enhanced Visual Distinction */}
                     <section>
-                        <div className="rounded-xl border border-[#EF4444]/20 bg-[#EF4444]/5 p-4">
+                        <div className="rounded-xl border border-negative/20 bg-negative/5 p-4">
                             <h2 className="text-xs font-medium uppercase tracking-wider text-negative mb-4 flex items-center gap-2">
                                 <AlertTriangle size={14} />
                                 Danger Zone

@@ -11,7 +11,7 @@ export default function NotFound() {
             <p className="mt-2 text-muted">Page not found in AuraFlow</p>
 
             <Link
-                href="/"
+                href="/dashboard"
                 className="mt-8 px-6 py-3 rounded-xl bg-foreground text-background font-bold hover:opacity-90 transition-opacity"
             >
                 Return Home

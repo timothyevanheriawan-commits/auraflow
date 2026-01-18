@@ -31,6 +31,6 @@ export async function signup(formData: FormData) {
   }
 
   // 3. Sukses
-  revalidatePath("/", "layout");
-  redirect("/");
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard");
 }

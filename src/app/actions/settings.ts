@@ -20,7 +20,7 @@ export async function updatePreferences(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/settings");
   return { success: true };
 }

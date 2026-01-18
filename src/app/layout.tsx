@@ -9,8 +9,24 @@ import { Toaster } from 'sonner'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "  AuraFlow",
-  description: "Track your wealth with precision.",
+  title: {
+    default: "AuraFlow | Personal Finance OS",
+    template: "%s | AuraFlow"
+  },
+  description: "The high-performance financial terminal for modern engineers and designers.",
+  openGraph: {
+    title: "AuraFlow",
+    description: "Track your wealth with precision and style.",
+    url: "https://auraflow.app", // Change to your real URL
+    siteName: "AuraFlow",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AuraFlow",
+    description: "Personal Finance for the modern era.",
+  },
 };
 
 export default function RootLayout({

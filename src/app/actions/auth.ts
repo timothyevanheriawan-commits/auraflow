@@ -25,6 +25,6 @@ export async function resetData() {
   // Reset saldo semua akun jadi 0
   await supabase.from("accounts").update({ balance: 0 }).eq("user_id", user.id);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   return { success: true };
 }

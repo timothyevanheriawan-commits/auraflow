@@ -67,7 +67,10 @@ export default function TransactionSearch({ currentSearch }: TransactionSearchPr
             />
             {value && (
                 <button
+                    type="button"
                     onClick={handleClear}
+                    aria-label="Clear search"
+                    title="Clear search"
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary hover:text-muted transition-colors duration-150"
                 >
                     <X size={16} />

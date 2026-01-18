@@ -3,10 +3,11 @@
 import { useState, useTransition } from 'react'
 import { MoreVertical, Edit2, Trash2, Lock } from 'lucide-react'
 import { deleteCategory } from '@/app/actions/category'
-import EditCategoryModal from '@/components/categories/edit-category-modal'
+// 1. PRINCIPLE 4: Import shared type instead of defining it locally
+import EditCategoryModal, { Category } from '@/components/categories/edit-category-modal'
 
 interface CategoryCardProps {
-    category: any
+    category: Category
     isSystem?: boolean
 }
 
@@ -15,28 +16,30 @@ export default function CategoryCard({ category, isSystem = false }: CategoryCar
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleting, startDeleteTransition] = useTransition()
 
-    // --- FIX 1: DELETE LOGIC ---
     const handleDelete = () => {
-        if (confirm(`Delete category "${category.name}"? This cannot be undone.`)) {
-            startDeleteTransition(async () => {
-                // Create FormData manually because the server expects it
-                const formData = new FormData()
-                formData.append('id', category.id)
+        if (!confirm(`Delete category "${category.name}"? This cannot be undone.`)) return
 
-                await deleteCategory(formData)
-                setShowMenu(false)
-            })
-        }
+        startDeleteTransition(async () => {
+            const formData = new FormData()
+            formData.append('id', category.id)
+            await deleteCategory(formData)
+            setShowMenu(false)
+        })
     }
 
     return (
         <>
-            <div className="group relative flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3 hover:border-border transition-all duration-150 ease-out">
+            {/* PRINCIPLE 2: Solid backgrounds to prevent ghosting */}
+            <div className="group relative flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3 transition-all duration-150 ease-out hover:border-border/80">
                 {/* Category Info */}
                 <div className="flex items-center gap-3">
+                    {/* 
+                        Note: Inline style untuk background color dinamis (user-generated) 
+                        adalah praktik standar di Fintech UI untuk kategori unik. 
+                    */}
                     <div
-                        className="h-3 w-3 rounded-full shadow-sm ring-1 ring-white/10"
-                        style={{ backgroundColor: category.color || '#64748B' }}
+                        className="h-3 w-3 rounded-full shadow-sm ring-1 ring-black/5"
+                        style={{ backgroundColor: category.color ?? '#64748B' }}
                     />
                     <span className="text-sm font-medium text-foreground">
                         {category.name}
@@ -46,29 +49,36 @@ export default function CategoryCard({ category, isSystem = false }: CategoryCar
                 {/* Actions */}
                 <div className="relative">
                     {isSystem ? (
-                        <Lock size={14} className="text-tertiary" />
+                        <div title="System category cannot be modified" className="p-2">
+                            <Lock size={14} className="text-tertiary" />
+                        </div>
                     ) : (
                         <button
-                            onClick={() => setShowMenu(!showMenu)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-tertiary hover:bg-elevated hover:text-foreground transition-colors"
+                            type="button"
+                            title="Category actions"
+                            aria-label="Category actions"
+                            onClick={() => setShowMenu((v) => !v)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-tertiary hover:bg-elevated hover:text-foreground transition-colors active:scale-90"
                         >
                             <MoreVertical size={16} />
                         </button>
                     )}
 
-                    {/* Dropdown Menu */}
+                    {/* PRINCIPLE 2: Solid Dropdown Menu z-index 50 */}
                     {showMenu && (
                         <>
-                            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setShowMenu(false)}
+                            />
                             <div className="absolute right-0 top-10 z-50 w-36 rounded-xl border border-border bg-surface py-1 shadow-xl animate-in fade-in zoom-in-95 duration-100">
-
-                                {/* Edit Button */}
                                 <button
+                                    type="button"
                                     onClick={() => {
                                         setIsEditOpen(true)
                                         setShowMenu(false)
                                     }}
-                                    className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-secondary hover:bg-elevated hover:text-foreground transition-colors"
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-xs font-bold text-muted hover:bg-elevated hover:text-foreground transition-colors"
                                 >
                                     <Edit2 size={14} />
                                     Edit
@@ -76,14 +86,14 @@ export default function CategoryCard({ category, isSystem = false }: CategoryCar
 
                                 <div className="my-1 h-px bg-border" />
 
-                                {/* Delete Button */}
                                 <button
+                                    type="button"
                                     onClick={handleDelete}
                                     disabled={isDeleting}
-                                    className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50"
                                 >
                                     <Trash2 size={14} />
-                                    {isDeleting ? 'Deleting...' : 'Delete'}
+                                    {isDeleting ? 'Deleting…' : 'Delete'}
                                 </button>
                             </div>
                         </>
@@ -91,12 +101,14 @@ export default function CategoryCard({ category, isSystem = false }: CategoryCar
                 </div>
             </div>
 
-            {/* --- FIX 2: EDIT MODAL --- */}
-            <EditCategoryModal
-                isOpen={isEditOpen}
-                onClose={() => setIsEditOpen(false)}
-                category={category}
-            />
+            {/* Render Edit Modal */}
+            {isEditOpen && (
+                <EditCategoryModal
+                    isOpen={isEditOpen}
+                    onClose={() => setIsEditOpen(false)}
+                    category={category}
+                />
+            )}
         </>
     )
 }

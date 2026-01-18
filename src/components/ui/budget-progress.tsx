@@ -51,8 +51,8 @@ export default function BudgetProgress({
 
                     <div className="h-2 w-full rounded-full bg-elevated overflow-hidden">
                         <div
-                            className={`h-full rounded-full transition-all duration-200 ${savingsRate >= 20 ? 'bg-[#22C55E]' :
-                                savingsRate >= 0 ? 'bg-[#64748B]' : 'bg-[#EF4444]'
+                            className={`h-full rounded-full transition-all duration-200 ${savingsRate >= 20 ? 'bg-positive' :
+                                savingsRate >= 0 ? 'bg-[#64748B]' : 'bg-negative'
                                 }`}
                             style={{ width: `${Math.max(0, Math.min(savingsRate, 100))}%` }}
                         />
